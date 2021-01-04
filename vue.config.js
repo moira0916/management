@@ -1,6 +1,8 @@
 'use strict'
 const path = require('path')
 const defaultSettings = require('./src/settings.js')
+const webpack = require('webpack')
+
 
 function resolve(dir) {
   return path.join(__dirname, dir)
@@ -24,7 +26,7 @@ module.exports = {
    * In most cases please use '/' !!!
    * Detail: https://cli.vuejs.org/config/#publicpath
    */
-  publicPath: '/',
+  publicPath: './',
   outputDir: 'dist',
   assetsDir: 'static',
   lintOnSave: process.env.NODE_ENV === 'development',
@@ -32,21 +34,42 @@ module.exports = {
   devServer: {
     port: port,
     open: true,
+     // 配置多个代理
+     proxy: {
+      "/dev-api": {
+        target: "http://localhost:1080",// 要访问的接口域名https://junxi-hr-manager.herokuapp.com
+        ws: true, 
+        secure: true,
+        changeOrigin: true, //开启代理：在本地会创建一个虚拟服务端，然后发送请求的数据，并同时接收请求的数据，这样服务端和服务端进行数据的交互就不会有跨域问题
+        pathRewrite: {
+          '^/dev-api': ''
+        }
+      }
+    },
     overlay: {
       warnings: false,
       errors: true
     },
-    before: require('./mock/mock-server.js')
+  // before: require('./mock/mock-server.js') //lxc注释
   },
   configureWebpack: {
     // provide the app's title in webpack's name field, so that
     // it can be accessed in index.html to inject the correct title.
     name: name,
+    devtool: 'source-map',
     resolve: {
       alias: {
         '@': resolve('src')
       }
-    }
+    },
+    plugins: [
+      new webpack.ProvidePlugin({
+        $: 'jquery',
+
+        jQuery: 'jquery',
+        'windows.jQuery': 'jquery'
+      })
+    ]
   },
   chainWebpack(config) {
     // it can improve the speed of the first screen, it is recommended to turn on preload
@@ -120,4 +143,5 @@ module.exports = {
         }
       )
   }
+
 }

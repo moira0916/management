@@ -4,9 +4,14 @@ import { resetRouter } from '@/router'
 
 const getDefaultState = () => {
   return {
-    token: getToken(),
+    // token: getToken() || '1234567890',
+    // name: 'test',
+    // avatar: '',
+    // roles: ['comp_admin']
+    token: getToken() || '',
     name: '',
-    avatar: ''
+    avatar: '',
+    roles: []
   }
 }
 
@@ -24,6 +29,24 @@ const mutations = {
   },
   SET_AVATAR: (state, avatar) => {
     state.avatar = avatar
+  },
+  SET_ROLES: (state, roles) => {
+    let role = []
+    switch (roles){
+      case -1:
+        role = ['admin']
+        break;
+      case 1:
+        role = ['comp_admin']
+        break;
+      case 2:
+        role = ['personal']
+        break;
+      default:
+        break;
+  
+    }
+    state.roles = role
   }
 }
 
@@ -34,8 +57,11 @@ const actions = {
     return new Promise((resolve, reject) => {
       login({ username: username.trim(), password: password }).then(response => {
         const { data } = response
+        console.log("22"+data.token)
         commit('SET_TOKEN', data.token)
         setToken(data.token)
+       
+      
         resolve()
       }).catch(error => {
         reject(error)
@@ -44,25 +70,26 @@ const actions = {
   },
 
   // get user info
-  getInfo({ commit, state }) {
+  getInfo({ commit }) {
     return new Promise((resolve, reject) => {
-      getInfo(state.token).then(response => {
+      getInfo().then(response => {
         const { data } = response
 
         if (!data) {
-          return reject('Verification failed, please Login again.')
+          return reject('验证失败，请重新登录.')
         }
 
-        const { name, avatar } = data
+        const { code, name } = data
 
         commit('SET_NAME', name)
-        commit('SET_AVATAR', avatar)
+        commit('SET_ROLES', code)
         resolve(data)
       }).catch(error => {
         reject(error)
       })
     })
   },
+
 
   // user logout
   logout({ commit, state }) {
@@ -85,8 +112,18 @@ const actions = {
       commit('RESET_STATE')
       resolve()
     })
+  },
+  // remove token
+  toLogOut({ commit }) {
+    return new Promise(resolve => {
+      removeToken() // must remove  token  first
+      resetRouter()
+      commit('RESET_STATE')
+      resolve()
+    })
   }
 }
+ 
 
 export default {
   namespaced: true,

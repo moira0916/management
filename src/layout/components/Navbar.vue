@@ -7,23 +7,20 @@
     <div class="right-menu">
       <el-dropdown class="avatar-container" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="avatar+'?imageView2/1/w/80/h/80'" class="user-avatar">
+          {{$t('m.setting')}}
           <i class="el-icon-caret-bottom" />
         </div>
         <el-dropdown-menu slot="dropdown" class="user-dropdown">
-          <router-link to="/">
+          <!-- <router-link to="/">
             <el-dropdown-item>
               Home
             </el-dropdown-item>
-          </router-link>
-          <a target="_blank" href="https://github.com/PanJiaChen/vue-admin-template/">
-            <el-dropdown-item>Github</el-dropdown-item>
-          </a>
-          <a target="_blank" href="https://panjiachen.github.io/vue-element-admin-site/#/">
-            <el-dropdown-item>Docs</el-dropdown-item>
-          </a>
+          </router-link> -->
+           <el-dropdown-item  @click.native="changeLangEvent">
+             {{$t('m.lang')}}
+           </el-dropdown-item>
           <el-dropdown-item divided @click.native="logout">
-            <span style="display:block;">Log Out</span>
+            <span style="display:block;">{{$t('m.logout')}}</span>
           </el-dropdown-item>
         </el-dropdown-menu>
       </el-dropdown>
@@ -37,6 +34,11 @@ import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 
 export default {
+  data() {
+    return {
+      lang:'zh-CN'
+    }
+  },
   components: {
     Breadcrumb,
     Hamburger
@@ -52,9 +54,30 @@ export default {
       this.$store.dispatch('app/toggleSideBar')
     },
     async logout() {
-      await this.$store.dispatch('user/logout')
-      this.$router.push(`/login?redirect=${this.$route.fullPath}`)
-    }
+      await this.$store.dispatch('user/toLogOut')
+      //await this.$store.dispatch('user/logout')
+      this.$router.push(`/login`)
+      //this.$router.push(`/login?redirect=${this.$route.fullPath}`)
+    },
+     changeLangEvent() {
+   this.$confirm('确定切换语言吗?', '提示', {
+       confirmButtonText: '确定',
+       cancelButtonText: '取消',
+       type: 'warning'
+    }).then(() => {
+       if ( this.lang === 'zh-CN' ) {
+          this.lang = 'en-US';
+          this.$i18n.locale = this.lang;//关键语句
+       }else {
+          this.lang = 'zh-CN';
+          this.$i18n.locale = this.lang;//关键语句
+       }
+    }).catch(() => {
+       this.$message({
+           type: 'info',
+       });          
+    });
+}
   }
 }
 </script>
@@ -129,7 +152,7 @@ export default {
           cursor: pointer;
           position: absolute;
           right: -20px;
-          top: 25px;
+          top: 20px;
           font-size: 12px;
         }
       }
